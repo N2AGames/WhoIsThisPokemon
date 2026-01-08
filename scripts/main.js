@@ -26,50 +26,126 @@ document.addEventListener('DOMContentLoaded', () => {
         const trysElement = document.getElementById('pokemon-trys');
         if (guessedName) {
             if(guessedName.toLowerCase() === currentPokemonData.name.toLowerCase()) {
-                alert('Correct! You guessed the Pokémon!');
-                // Reinitialize the game with a new Pokémon
-                initGame();
+                // Reveal the Pokémon
+                const pokemonImage = document.getElementById('pokemon-image');
+                pokemonImage.classList.remove('silhouette');
+                
+                setTimeout(() => {
+                    showNotification(`¡Correcto! 🎉 Era ${currentPokemonData.name}`, 'success', 2500);
+                    // Reinitialize the game with a new Pokémon after showing notification
+                    setTimeout(() => initGame(), 2500);
+                }, 600);
             } else {
-                alert('Wrong!');
                 guessTries++;
                 trysElement.textContent = `Tries: ${guessTries}`;
                 if (guessTries >= maxTryes) {
-                    alert(`Game Over! The correct answer was ${currentPokemonData.name}.`);
-                    // Reinitialize the game with a new Pokémon
-                    initGame();
+                    // Reveal the Pokémon when game over
+                    const pokemonImage = document.getElementById('pokemon-image');
+                    pokemonImage.classList.remove('silhouette');
+                    
+                    setTimeout(() => {
+                        showNotification(`Game Over 😢 El Pokémon era: ${currentPokemonData.name}`, 'error', 3000);
+                        // Reinitialize the game with a new Pokémon after showing notification
+                        setTimeout(() => initGame(), 3000);
+                    }, 600);
+                } else {
+                    showNotification(`¡Incorrecto! Te quedan ${maxTryes - guessTries} intentos.`, 'warning', 2000);
                 }
             }
         } else {
-            alert('Please enter a Pokémon name.');
+            showNotification('Por favor ingresa un nombre de Pokémon.', 'info', 2000);
         }
     });
 });
 
 function handleAutocomplete(event) {
     const input = event.target.value.toLowerCase();
-    const datalist = document.getElementById('pokemon-suggestions');
+    const dropdown = document.getElementById('suggestions-dropdown');
     
     // Clear previous suggestions
-    datalist.innerHTML = '';
+    dropdown.innerHTML = '';
     
     // Only show suggestions if 3 or more characters are typed
-    if (input.length >= 3) {
+    if (input.length >= 3 && pokemonList.length > 0) {
         const filtered = pokemonList.filter(name => 
             name.toLowerCase().startsWith(input)
-        ).slice(0, 10); // Limit to 10 suggestions
+        ).slice(0, 8); // Limit to 8 suggestions
         
-        filtered.forEach(name => {
-            const option = document.createElement('option');
-            option.value = name;
-            datalist.appendChild(option);
-        });
+        if (filtered.length > 0) {
+            dropdown.style.display = 'block';
+            filtered.forEach(name => {
+                const suggestion = document.createElement('div');
+                suggestion.className = 'suggestion-item';
+                suggestion.textContent = name;
+                suggestion.addEventListener('click', () => {
+                    document.getElementById('pokemon-guess').value = name;
+                    dropdown.style.display = 'none';
+                });
+                dropdown.appendChild(suggestion);
+            });
+        } else {
+            dropdown.style.display = 'none';
+        }
+    } else {
+        dropdown.style.display = 'none';
     }
+}
+
+// Hide suggestions when clicking outside
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('suggestions-dropdown');
+    const input = document.getElementById('pokemon-guess');
+    if (dropdown && e.target !== input && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Notification system
+function showNotification(message, type = 'info', duration = 3000) {
+    return new Promise((resolve) => {
+        const container = document.getElementById('notification-container');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        // Set icon based on type
+        let icon = '';
+        if (type === 'success') {
+            icon = '✓';
+        } else if (type === 'error') {
+            icon = '✗';
+        } else if (type === 'warning') {
+            icon = '!';
+        } else {
+            icon = 'i';
+        }
+        
+        notification.innerHTML = `
+            <div class="notification-icon">${icon}</div>
+            <div class="notification-message">${message}</div>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Trigger animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Auto remove after duration
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+                resolve();
+            }, 300);
+        }, duration);
+    });
 }
 
 function initGame() {
     const trysElement = document.getElementById('pokemon-trys');
-    gessTrys = 0;
-    trysElement.textContent = `Tries: ${gessTrys}`;
+    guessTries = 0;
+    trysElement.textContent = `Tries: ${guessTries}`;
 
     const guessInput = document.getElementById('pokemon-guess');
     guessInput.value = '';
@@ -79,10 +155,14 @@ function initGame() {
         .then(pokemonData => {
             currentPokemonData = pokemonData;
             displayPokemonPicture(pokemonData);
+            
+            // Apply silhouette effect
+            const pokemonImage = document.getElementById('pokemon-image');
+            pokemonImage.classList.add('silhouette');
         })
         .catch(error => {
             console.error('Error fetching Pokémon data:', error);
-            alert('Could not find that Pokémon. Please try again!');
+            showNotification('No se pudo cargar el Pokémon. Por favor intenta de nuevo.', 'error', 3000);
         }
     );
 }

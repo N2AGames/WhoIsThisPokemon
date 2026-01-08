@@ -22,9 +22,14 @@
         <div id="pokemon-trys">Tries: 0</div>
     </div>
     <form id="pokemon-form">
-        <input type="text" id="pokemon-guess" placeholder="Enter your guess here" list="pokemon-suggestions" autocomplete="off" required>
-        <datalist id="pokemon-suggestions"></datalist>
+        <div class="input-container">
+            <input type="text" id="pokemon-guess" placeholder="Enter your guess here" autocomplete="off" required>
+            <div id="suggestions-dropdown" class="suggestions-dropdown"></div>
+        </div>
         <button type="submit">Submit Guess</button>
     </form>
+    
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
 </body>
 </html>
