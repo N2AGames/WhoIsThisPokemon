@@ -65,6 +65,7 @@ body::before {
 }
 
 h1 {
+    font-family: 'Pokemon Solid', sans-serif;
     color: #ffde00;
     font-size: 2rem;
     text-align: center;
@@ -76,7 +77,7 @@ h1 {
         -1px 1px 0 #2a75bb,
         1px 1px 0 #2a75bb,
         4px 4px 8px rgba(0, 0, 0, 0.3);
-    font-weight: bold;
+    font-weight: normal;
     letter-spacing: 2px;
     z-index: 1;
     position: relative;
