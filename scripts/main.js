@@ -1,51 +1,21 @@
-function loadPokemonData(pokemonName) {
-    const apiUrl = `https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`;
-    return fetch(apiUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.json();
-        }
-    );
-}
-
-function loadRandomPokemon() {
-    const randomId = Math.floor(Math.random() * 1025) + 1; // Assuming there are 1025 Pokémon
-    const apiUrl = `https://pokeapi.co/api/v2/pokemon/${randomId}`;
-    return fetch(apiUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.json();
-        }
-    );
-}
-
-function displayPokemonPicture(pokemonData) {
-    const imgElement = document.getElementById('pokemon-image');
-    imgElement.src = pokemonData.sprites.front_default;
-    imgElement.alt = pokemonData.name;
-}
+let pokemonList = [];
+let currentPokemonData = null;
+let guessTries = 0;
+const maxTryes = 5;
 
 document.addEventListener('DOMContentLoaded', () => {
-    const maxTryes = 5;
-    
-    let currentPokemonData = null;
-    let gessTrys = 0;
+    // Load Pokémon list for autocomplete
+    loadPokemonNameList().then(list => {
+        pokemonList = list;
+        console.log('Pokémon list loaded:', pokemonList.length, 'Pokémon');
+    });
 
-    // Load and display a random Pokémon on page load
-    loadRandomPokemon()
-        .then(pokemonData => {
-            currentPokemonData = pokemonData;
-            displayPokemonPicture(pokemonData);
-        })
-        .catch(error => {
-            console.error('Error fetching Pokémon data:', error);
-            alert('Could not find that Pokémon. Please try again!');
-        }
-    );
+    // Setup autocomplete
+    const guessInput = document.getElementById('pokemon-guess');
+    guessInput.addEventListener('input', handleAutocomplete);
+
+    // Initialize the game
+    initGame();
     
     // Handle form submission
     const form = document.getElementById('pokemon-form');
@@ -61,9 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 initGame();
             } else {
                 alert('Wrong!');
-                gessTrys++;
-                trysElement.textContent = `Tries: ${gessTrys}`;
-                if (gessTrys >= maxTryes) {
+                guessTries++;
+                trysElement.textContent = `Tries: ${guessTries}`;
+                if (guessTries >= maxTryes) {
                     alert(`Game Over! The correct answer was ${currentPokemonData.name}.`);
                     // Reinitialize the game with a new Pokémon
                     initGame();
@@ -75,6 +45,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+function handleAutocomplete(event) {
+    const input = event.target.value.toLowerCase();
+    const datalist = document.getElementById('pokemon-suggestions');
+    
+    // Clear previous suggestions
+    datalist.innerHTML = '';
+    
+    // Only show suggestions if 3 or more characters are typed
+    if (input.length >= 3) {
+        const filtered = pokemonList.filter(name => 
+            name.toLowerCase().startsWith(input)
+        ).slice(0, 10); // Limit to 10 suggestions
+        
+        filtered.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            datalist.appendChild(option);
+        });
+    }
+}
+
 function initGame() {
     const trysElement = document.getElementById('pokemon-trys');
     gessTrys = 0;
@@ -82,6 +73,7 @@ function initGame() {
 
     const guessInput = document.getElementById('pokemon-guess');
     guessInput.value = '';
+
     // Load and display a new random Pokémon after each guess
     loadRandomPokemon()
         .then(pokemonData => {
