@@ -97,99 +97,6 @@ function updateHistoryDisplay() {
     }).join('');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Load stats
-    loadStats();
-    
-    // Load Pokémon list for autocomplete
-    loadPokemonNameList().then(list => {
-        pokemonList = list;
-        console.log('Pokémon list loaded:', pokemonList.length, 'Pokémon');
-    });
-
-    // Setup autocomplete
-    const guessInput = document.getElementById('pokemon-guess');
-    guessInput.addEventListener('input', handleAutocomplete);
-
-    // Stats modal handlers
-    const statsButton = document.getElementById('stats-button');
-    const statsModal = document.getElementById('stats-modal');
-    const closeBtn = statsModal.querySelector('.stats-close-btn');
-    const clearStatsBtn = document.getElementById('clear-stats-btn');
-    
-    statsButton.addEventListener('click', () => {
-        statsModal.style.display = 'flex';
-        updateStatsDisplay();
-    });
-    
-    closeBtn.addEventListener('click', () => {
-        statsModal.style.display = 'none';
-    });
-    
-    statsModal.addEventListener('click', (e) => {
-        if (e.target === statsModal) {
-            statsModal.style.display = 'none';
-        }
-    });
-    
-    clearStatsBtn.addEventListener('click', () => {
-        if (confirm('¿Estás seguro de que quieres limpiar todas las estadísticas?')) {
-            gameStats = { wins: 0, losses: 0, history: [] };
-            saveStats();
-            showNotification('Estadísticas limpiadas', 'info', 2000);
-        }
-    });
-
-    // Initialize the game
-    initGame();
-    
-    // Handle form submission
-    const form = document.getElementById('pokemon-form');
-    form.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const guessInput = document.getElementById('pokemon-guess');
-        const guessedName = guessInput.value.trim();
-        const trysElement = document.getElementById('pokemon-trys');
-        if (guessedName) {
-            if(guessedName.toLowerCase() === currentPokemonData.name.toLowerCase()) {
-                // Reveal the Pokémon
-                const pokemonImage = document.getElementById('pokemon-image');
-                pokemonImage.classList.remove('silhouette');
-                
-                // Register win
-                addGameResult(true, currentPokemonData.name, guessTries + 1);
-                
-                setTimeout(() => {
-                    showNotification(`¡Correcto! 🎉 Era ${currentPokemonData.name}`, 'success', 2500);
-                    // Reinitialize the game with a new Pokémon after showing notification
-                    setTimeout(() => initGame(), 2500);
-                }, 600);
-            } else {
-                guessTries++;
-                trysElement.textContent = `Tries: ${guessTries}`;
-                if (guessTries >= maxTryes) {
-                    // Reveal the Pokémon when game over
-                    const pokemonImage = document.getElementById('pokemon-image');
-                    pokemonImage.classList.remove('silhouette');
-                    
-                    // Register loss
-                    addGameResult(false, currentPokemonData.name, guessTries);
-                    
-                    setTimeout(() => {
-                        showNotification(`Game Over 😢 El Pokémon era: ${currentPokemonData.name}`, 'error', 3000);
-                        // Reinitialize the game with a new Pokémon after showing notification
-                        setTimeout(() => initGame(), 3000);
-                    }, 600);
-                } else {
-                    showNotification(`¡Incorrecto! Te quedan ${maxTryes - guessTries} intentos.`, 'warning', 2000);
-                }
-            }
-        } else {
-            showNotification('Por favor ingresa un nombre de Pokémon.', 'info', 2000);
-        }
-    });
-});
-
 function handleAutocomplete(event) {
     const input = event.target.value.toLowerCase();
     const dropdown = document.getElementById('suggestions-dropdown');
@@ -298,3 +205,97 @@ function initGame() {
         }
     );
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Load stats
+    loadStats();
+    
+    // Load Pokémon list for autocomplete
+    loadPokemonNameList().then(list => {
+        pokemonList = list;
+        console.log('Pokémon list loaded:', pokemonList.length, 'Pokémon');
+    });
+
+    // Setup autocomplete
+    const guessInput = document.getElementById('pokemon-guess');
+    guessInput.addEventListener('input', handleAutocomplete);
+
+    // Stats modal handlers
+    const statsButton = document.getElementById('stats-button');
+    const statsModal = document.getElementById('stats-modal');
+    const closeBtn = statsModal.querySelector('.stats-close-btn');
+    const clearStatsBtn = document.getElementById('clear-stats-btn');
+    
+    statsButton.addEventListener('click', () => {
+        statsModal.style.display = 'flex';
+        updateStatsDisplay();
+    });
+    
+    closeBtn.addEventListener('click', () => {
+        statsModal.style.display = 'none';
+    });
+    
+    statsModal.addEventListener('click', (e) => {
+        if (e.target === statsModal) {
+            statsModal.style.display = 'none';
+        }
+    });
+    
+    clearStatsBtn.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que quieres limpiar todas las estadísticas?')) {
+            gameStats = { wins: 0, losses: 0, history: [] };
+            saveStats();
+            showNotification('Estadísticas limpiadas', 'info', 2000);
+        }
+    });
+
+    // Initialize the game
+    initGame();
+    
+    // Handle form submission
+    const form = document.getElementById('pokemon-form');
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const guessInput = document.getElementById('pokemon-guess');
+        const guessedName = guessInput.value.trim();
+        const trysElement = document.getElementById('pokemon-trys');
+        if (guessedName) {
+            if(guessedName.toLowerCase() === currentPokemonData.name.toLowerCase()) {
+                // Reveal the Pokémon
+                const pokemonImage = document.getElementById('pokemon-image');
+                pokemonImage.classList.remove('silhouette');
+                
+                // Register win
+                addGameResult(true, currentPokemonData.name, guessTries + 1);
+                
+                setTimeout(() => {
+                    showNotification(`¡Correcto! 🎉 Era ${currentPokemonData.name}`, 'success', 2500);
+                    // Reinitialize the game with a new Pokémon after showing notification
+                    setTimeout(() => initGame(), 2500);
+                }, 600);
+            } else {
+                guessTries++;
+                trysElement.textContent = `Tries: ${guessTries}`;
+                if (guessTries >= maxTryes) {
+                    // Reveal the Pokémon when game over
+                    const pokemonImage = document.getElementById('pokemon-image');
+                    pokemonImage.classList.remove('silhouette');
+                    
+                    // Register loss
+                    addGameResult(false, currentPokemonData.name, guessTries);
+                    
+                    setTimeout(() => {
+                        showNotification(`Game Over 😢 El Pokémon era: ${currentPokemonData.name}`, 'error', 3000);
+                        // Reinitialize the game with a new Pokémon after showing notification
+                        setTimeout(() => initGame(), 3000);
+                    }, 600);
+                } else {
+                    showNotification(`¡Incorrecto! Te quedan ${maxTryes - guessTries} intentos.`, 'warning', 2000);
+                    guessInput.value = '';
+                }
+            }
+        } else {
+            showNotification('Por favor ingresa un nombre de Pokémon.', 'info', 2000);
+        }
+    });
+});
