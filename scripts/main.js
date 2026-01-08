@@ -3,7 +3,104 @@ let currentPokemonData = null;
 let guessTries = 0;
 const maxTryes = 5;
 
+// Stats system
+let gameStats = {
+    wins: 0,
+    losses: 0,
+    history: []
+};
+
+// Load stats from localStorage
+function loadStats() {
+    const saved = localStorage.getItem('pokemonGameStats');
+    if (saved) {
+        gameStats = JSON.parse(saved);
+    }
+    updateStatsDisplay();
+}
+
+// Save stats to localStorage
+function saveStats() {
+    localStorage.setItem('pokemonGameStats', JSON.stringify(gameStats));
+    updateStatsDisplay();
+}
+
+// Add game result to history
+function addGameResult(won, pokemonName, tries) {
+    const result = {
+        won: won,
+        pokemon: pokemonName,
+        tries: tries,
+        timestamp: new Date().toISOString()
+    };
+    
+    gameStats.history.unshift(result); // Add to beginning
+    if (gameStats.history.length > 50) {
+        gameStats.history = gameStats.history.slice(0, 50); // Keep last 50 games
+    }
+    
+    if (won) {
+        gameStats.wins++;
+    } else {
+        gameStats.losses++;
+    }
+    
+    saveStats();
+}
+
+// Update stats display
+function updateStatsDisplay() {
+    const winsElement = document.getElementById('total-wins');
+    const lossesElement = document.getElementById('total-losses');
+    const winRateElement = document.getElementById('win-rate');
+    
+    if (winsElement) winsElement.textContent = gameStats.wins;
+    if (lossesElement) lossesElement.textContent = gameStats.losses;
+    
+    const totalGames = gameStats.wins + gameStats.losses;
+    const winRate = totalGames > 0 ? Math.round((gameStats.wins / totalGames) * 100) : 0;
+    if (winRateElement) winRateElement.textContent = winRate + '%';
+    
+    updateHistoryDisplay();
+}
+
+// Update history display
+function updateHistoryDisplay() {
+    const historyContainer = document.getElementById('game-history');
+    if (!historyContainer) return;
+    
+    if (gameStats.history.length === 0) {
+        historyContainer.innerHTML = '<p class="no-history">Aún no hay partidas jugadas.</p>';
+        return;
+    }
+    
+    historyContainer.innerHTML = gameStats.history.map(game => {
+        const date = new Date(game.timestamp);
+        const timeStr = date.toLocaleString('es-ES', { 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        const resultClass = game.won ? 'success' : 'error';
+        const resultIcon = game.won ? '✓' : '✗';
+        const resultText = game.won ? 'Victoria' : 'Derrota';
+        
+        return `
+            <div class="history-item ${resultClass}">
+                <span class="history-icon">${resultIcon}</span>
+                <span class="history-pokemon">${game.pokemon}</span>
+                <span class="history-result">${resultText} (${game.tries} intentos)</span>
+                <span class="history-time">${timeStr}</span>
+            </div>
+        `;
+    }).join('');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Load stats
+    loadStats();
+    
     // Load Pokémon list for autocomplete
     loadPokemonNameList().then(list => {
         pokemonList = list;
@@ -13,6 +110,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup autocomplete
     const guessInput = document.getElementById('pokemon-guess');
     guessInput.addEventListener('input', handleAutocomplete);
+
+    // Stats modal handlers
+    const statsButton = document.getElementById('stats-button');
+    const statsModal = document.getElementById('stats-modal');
+    const closeBtn = statsModal.querySelector('.stats-close-btn');
+    const clearStatsBtn = document.getElementById('clear-stats-btn');
+    
+    statsButton.addEventListener('click', () => {
+        statsModal.style.display = 'flex';
+        updateStatsDisplay();
+    });
+    
+    closeBtn.addEventListener('click', () => {
+        statsModal.style.display = 'none';
+    });
+    
+    statsModal.addEventListener('click', (e) => {
+        if (e.target === statsModal) {
+            statsModal.style.display = 'none';
+        }
+    });
+    
+    clearStatsBtn.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que quieres limpiar todas las estadísticas?')) {
+            gameStats = { wins: 0, losses: 0, history: [] };
+            saveStats();
+            showNotification('Estadísticas limpiadas', 'info', 2000);
+        }
+    });
 
     // Initialize the game
     initGame();
@@ -30,6 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const pokemonImage = document.getElementById('pokemon-image');
                 pokemonImage.classList.remove('silhouette');
                 
+                // Register win
+                addGameResult(true, currentPokemonData.name, guessTries + 1);
+                
                 setTimeout(() => {
                     showNotification(`¡Correcto! 🎉 Era ${currentPokemonData.name}`, 'success', 2500);
                     // Reinitialize the game with a new Pokémon after showing notification
@@ -42,6 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Reveal the Pokémon when game over
                     const pokemonImage = document.getElementById('pokemon-image');
                     pokemonImage.classList.remove('silhouette');
+                    
+                    // Register loss
+                    addGameResult(false, currentPokemonData.name, guessTries);
                     
                     setTimeout(() => {
                         showNotification(`Game Over 😢 El Pokémon era: ${currentPokemonData.name}`, 'error', 3000);

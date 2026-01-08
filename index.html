@@ -14,6 +14,11 @@
     <title>Who is this Pokemon?</title>
 </head>
 <body>
+    <!-- Stats Button -->
+    <button id="stats-button" class="stats-button" title="Ver Estadísticas">
+        <span class="stats-icon">📊</span>
+    </button>
+    
     <h1>Who is this Pokemon?</h1>
     <div id="pokemon-container">
         <div class="pokemon-card">
@@ -31,5 +36,32 @@
     
     <!-- Notification Container -->
     <div id="notification-container"></div>
+    
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="stats-modal">
+        <div class="stats-modal-content">
+            <button class="stats-close-btn">&times;</button>
+            <h2>🏆 Estadísticas</h2>
+            <div class="stats-summary">
+                <div class="stat-card success">
+                    <div class="stat-number" id="total-wins">0</div>
+                    <div class="stat-label">Victorias</div>
+                </div>
+                <div class="stat-card error">
+                    <div class="stat-number" id="total-losses">0</div>
+                    <div class="stat-label">Derrotas</div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-number" id="win-rate">0%</div>
+                    <div class="stat-label">% Acierto</div>
+                </div>
+            </div>
+            <h3>📜 Historial de Partidas</h3>
+            <div id="game-history" class="game-history">
+                <p class="no-history">Aún no hay partidas jugadas.</p>
+            </div>
+            <button id="clear-stats-btn" class="clear-stats-btn">Limpiar Estadísticas</button>
+        </div>
+    </div>
 </body>
 </html>
