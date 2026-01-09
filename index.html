@@ -18,7 +18,7 @@
 </head>
 <body>
     <!-- Stats Button -->
-    <button id="stats-button" class="stats-button" title="Ver Estadísticas">
+    <button id="stats-button" class="stats-button" title="View Stats">
         <span class="stats-icon">📊</span>
     </button>
     
@@ -35,6 +35,7 @@
             <div id="suggestions-dropdown" class="suggestions-dropdown"></div>
         </div>
         <button type="submit">Submit Guess</button>
+        <button type="button" class="reveal-button" id="reveal-button">Reveal Pokemon<small>This counts as a defeat</small></button>
     </form>
     
     <!-- Notification Container -->
@@ -44,27 +45,32 @@
     <div id="stats-modal" class="stats-modal">
         <div class="stats-modal-content">
             <button class="stats-close-btn">&times;</button>
-            <h2>🏆 Estadísticas</h2>
+            <h2>🏆 Stats</h2>
             <div class="stats-summary">
                 <div class="stat-card success">
                     <div class="stat-number" id="total-wins">0</div>
-                    <div class="stat-label">Victorias</div>
+                    <div class="stat-label">Wins</div>
                 </div>
                 <div class="stat-card error">
                     <div class="stat-number" id="total-losses">0</div>
-                    <div class="stat-label">Derrotas</div>
+                    <div class="stat-label">Losses</div>
                 </div>
                 <div class="stat-card info">
                     <div class="stat-number" id="win-rate">0%</div>
-                    <div class="stat-label">% Acierto</div>
+                    <div class="stat-label">Win Rate</div>
                 </div>
             </div>
-            <h3>📜 Historial de Partidas</h3>
+            <h3>📜 Game History</h3>
             <div id="game-history" class="game-history">
-                <p class="no-history">Aún no hay partidas jugadas.</p>
+                <p class="no-history">No games played yet.</p>
             </div>
-            <button id="clear-stats-btn" class="clear-stats-btn">Limpiar Estadísticas</button>
+            <button id="clear-stats-btn" class="clear-stats-btn">Clear Statistics</button>
         </div>
     </div>
+
+    <!-- Audio player -->
+    <audio id="pokemon-sound" hidden>
+        <source type="audio/mpeg">
+    </audio>
 </body>
 </html>

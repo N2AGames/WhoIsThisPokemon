@@ -70,7 +70,7 @@ function updateHistoryDisplay() {
     if (!historyContainer) return;
     
     if (gameStats.history.length === 0) {
-        historyContainer.innerHTML = '<p class="no-history">Aún no hay partidas jugadas.</p>';
+        historyContainer.innerHTML = '<p class="no-history">No games played yet.</p>';
         return;
     }
     
@@ -84,13 +84,13 @@ function updateHistoryDisplay() {
         });
         const resultClass = game.won ? 'success' : 'error';
         const resultIcon = game.won ? '✓' : '✗';
-        const resultText = game.won ? 'Victoria' : 'Derrota';
+        const resultText = game.won ? 'Win' : 'Loss';
         
         return `
             <div class="history-item ${resultClass}">
                 <span class="history-icon">${resultIcon}</span>
                 <span class="history-pokemon">${game.pokemon}</span>
-                <span class="history-result">${resultText} (${game.tries} intentos)</span>
+                <span class="history-result">${resultText} (${game.tries} tries)</span>
                 <span class="history-time">${timeStr}</span>
             </div>
         `;
@@ -201,9 +201,16 @@ function initGame() {
         })
         .catch(error => {
             console.error('Error fetching Pokémon data:', error);
-            showNotification('No se pudo cargar el Pokémon. Por favor intenta de nuevo.', 'error', 3000);
+            showNotification('Could not load the Pokémon. Please try again.', 'error', 3000);
         }
     );
+}
+
+function playPokemonCry(pokemonSound, pokemonData) {
+    if (pokemonData?.cries?.legacy || pokemonData?.cries?.latest) {
+        pokemonSound.src = pokemonData?.cries?.legacy || pokemonData?.cries?.latest;
+        pokemonSound.play().catch(err => console.error('Error playing sound:', err));
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -225,6 +232,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const statsModal = document.getElementById('stats-modal');
     const closeBtn = statsModal.querySelector('.stats-close-btn');
     const clearStatsBtn = document.getElementById('clear-stats-btn');
+
+    // Sound components
+    const pokemonSound = document.getElementById('pokemon-sound');
+    pokemonSound.volume = 0.5; // Set default volume
     
     statsButton.addEventListener('click', () => {
         statsModal.style.display = 'flex';
@@ -242,10 +253,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     clearStatsBtn.addEventListener('click', () => {
-        if (confirm('¿Estás seguro de que quieres limpiar todas las estadísticas?')) {
+        if (confirm('Are you sure you want to clear all statistics?')) {
             gameStats = { wins: 0, losses: 0, history: [] };
             saveStats();
-            showNotification('Estadísticas limpiadas', 'info', 2000);
+            showNotification('Statistics cleared', 'info', 2000);
         }
     });
 
@@ -264,12 +275,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Reveal the Pokémon
                 const pokemonImage = document.getElementById('pokemon-image');
                 pokemonImage.classList.remove('silhouette');
-                
+                playPokemonCry(pokemonSound, currentPokemonData);
                 // Register win
                 addGameResult(true, currentPokemonData.name, guessTries + 1);
                 
                 setTimeout(() => {
-                    showNotification(`¡Correcto! 🎉 Era ${currentPokemonData.name}`, 'success', 2500);
+                    showNotification(`Correct! 🎉 It was ${currentPokemonData.name}`, 'success', 2500);
+                    // Play Pokémon cry sound
+                    playPokemonCry(pokemonSound, currentPokemonData);
                     // Reinitialize the game with a new Pokémon after showing notification
                     setTimeout(() => initGame(), 2500);
                 }, 600);
@@ -285,17 +298,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     addGameResult(false, currentPokemonData.name, guessTries);
                     
                     setTimeout(() => {
-                        showNotification(`Game Over 😢 El Pokémon era: ${currentPokemonData.name}`, 'error', 3000);
+                        showNotification(`Game Over 😢 The Pokémon was: ${currentPokemonData.name}`, 'error', 3000);
+                        // Play Pokémon cry sound
+                        playPokemonCry(pokemonSound, currentPokemonData);
+
                         // Reinitialize the game with a new Pokémon after showing notification
                         setTimeout(() => initGame(), 3000);
                     }, 600);
                 } else {
-                    showNotification(`¡Incorrecto! Te quedan ${maxTryes - guessTries} intentos.`, 'warning', 2000);
+                    showNotification(`Incorrect! You have ${maxTryes - guessTries} tries left.`, 'warning', 2000);
                     guessInput.value = '';
                 }
             }
         } else {
-            showNotification('Por favor ingresa un nombre de Pokémon.', 'info', 2000);
+            showNotification('Please enter a Pokémon name.', 'info', 2000);
         }
+    });
+
+    // Handle reveal button
+    const revealButton = document.getElementById('reveal-button');
+    revealButton.addEventListener('click', () => {
+        // Reveal the Pokémon when game over
+        const pokemonImage = document.getElementById('pokemon-image');
+        pokemonImage.classList.remove('silhouette');
+        
+        // Register loss
+        addGameResult(false, currentPokemonData.name, guessTries);
+        
+        setTimeout(() => {
+            showNotification(`Game Over 😢 The Pokémon was: ${currentPokemonData.name}`, 'error', 3000);
+            // Play Pokémon cry sound
+            playPokemonCry(pokemonSound, currentPokemonData);
+
+            // Reinitialize the game with a new Pokémon after showing notification
+            setTimeout(() => initGame(), 3000);
+        }, 600);
     });
 });

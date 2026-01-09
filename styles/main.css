@@ -625,11 +625,11 @@ button[type="submit"] {
     font-weight: bold;
     border: none;
     border-radius: 50px;
-    background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+    background: linear-gradient(145deg, #1bc07b, #1ee5a8);
     color: white;
     cursor: pointer;
     box-shadow: 
-        0 6px 0 #c44545,
+        0 6px 0 #0fa87f,
         0 8px 15px rgba(0, 0, 0, 0.3);
     transition: all 0.2s ease;
     text-transform: uppercase;
@@ -659,11 +659,69 @@ button[type="submit"]:hover::before {
 button[type="submit"]:hover {
     transform: translateY(-2px);
     box-shadow: 
-        0 8px 0 #c44545,
+        0 8px 0 #0fa87f,
         0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
 button[type="submit"]:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 4px 0 #0fa87f,
+        0 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+.reveal-button {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+    color: white;
+    cursor: pointer;
+    box-shadow: 
+        0 6px 0 #c44545,
+        0 8px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.reveal-button small {
+    display: block;
+    font-size: 0.6rem;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+.reveal-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.reveal-button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.reveal-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 0 #c44545,
+        0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.reveal-button:active {
     transform: translateY(2px);
     box-shadow: 
         0 4px 0 #c44545,
@@ -915,14 +973,4 @@ button[type="submit"]:active {
     .stat-label {
         font-size: 0.8rem;
     }
-}
-
-/* Additional Pokeball decoration */
-.pokemon-card::after {
-    content: '⚫';
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    font-size: 2rem;
-    opacity: 0.1;
 }
